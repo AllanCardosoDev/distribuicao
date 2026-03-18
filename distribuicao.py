@@ -11,6 +11,7 @@ def load_data(file_path):
 
         # Encontra a linha que contém 'CLASSIF' para usar como cabeçalho
         # Converte a primeira coluna para string para evitar erros com tipos mistos
+        # A planilha que você enviou tem 'CLASSIF' na linha 3 (índice 2)
         header_row_index = df_raw[df_raw.iloc[:, 0].astype(str).str.contains('CLASSIF', na=False)].index[0]
 
         # Agora, carrega a planilha novamente, usando a linha encontrada como cabeçalho
@@ -20,7 +21,9 @@ def load_data(file_path):
         # Renomear colunas para facilitar o acesso e lidar com nomes duplicados/vazios
         # Baseado na estrutura da sua planilha, as colunas são:
         # CLASSIF, NOME COMPLETO, SOMA DAS MÉDIAS, PESOS, MÉDIA 2 CASAS DECIMAIS, MED 3 CASAS, DATA DE NASCIMENTO
-        # Ajuste os nomes das colunas conforme a sua planilha real, se houver alguma diferença sutil
+        # Note que a coluna 'CRITÉRIOS DE DESEMPATE' na planilha original é dividida em 'MED 3 CASAS' e 'DATA DE NASCIMENTO'
+        # O Pandas, ao ler com skiprows, pode ter nomeado as colunas de forma ligeiramente diferente
+        # Vamos garantir que os nomes estejam corretos para o acesso posterior
         df.columns = ['CLASSIF', 'NOME COMPLETO', 'SOMA DAS MÉDIAS', 'PESOS',
                       'MÉDIA 2 CASAS DECIMAIS', 'MED 3 CASAS', 'DATA DE NASCIMENTO']
 
@@ -40,7 +43,7 @@ def load_data(file_path):
         return df
     except Exception as e:
         st.error(f"Erro ao carregar a planilha: {e}")
-        st.error("Verifique se o nome do arquivo está correto ('NOTAS.xlsx') e se o formato do cabeçalho da planilha está conforme o esperado.")
+        st.error("Verifique se o nome do arquivo está correto ('NOTAS_CFSD_BM_GERAL.xlsx' ou 'NOTAS.xlsx') e se o formato do cabeçalho da planilha está conforme o esperado.")
         return pd.DataFrame()
 
 # Cidades de lotação no Amazonas e vagas iniciais
@@ -63,9 +66,9 @@ def app():
     st.title("Sistema de Lotação de Militares - CFSD BM 2025")
     st.subheader("Escolha de Lotação por Classificação")
 
-    # Carregar dados - APONTA PARA "NOTAS.xlsx"
-    # Se você está usando o arquivo original "NOTAS_CFSD_BM_GERAL.xlsx", mude para esse nome.
-    df = load_data("NOTAS.xlsx")
+    # Carregar dados - APONTA PARA "NOTAS_CFSD_BM_GERAL.xlsx"
+    # Se você renomeou o arquivo para "NOTAS.xlsx", mude para esse nome.
+    df = load_data("NOTAS_CFSD_BM_GERAL.xlsx")
 
     if df.empty:
         st.warning("Não foi possível carregar os dados da planilha. Verifique o arquivo e o console para mais detalhes.")
@@ -130,6 +133,8 @@ def app():
     st.subheader("Lotações Confirmadas")
     if st.session_state.choices:
         choices_df = pd.DataFrame(st.session_state.choices.items(), columns=['Militar', 'Cidade de Lotação'])
+        # Adiciona 1 ao índice para que comece em 1 em vez de 0
+        choices_df.index = choices_df.index + 1
         st.dataframe(choices_df)
     else:
         st.info("Nenhuma lotação foi confirmada ainda.")
