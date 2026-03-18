@@ -20,6 +20,7 @@ def load_data(file_path):
         # Renomear colunas para facilitar o acesso e lidar com nomes duplicados/vazios
         # Baseado na estrutura da sua planilha, as colunas são:
         # CLASSIF, NOME COMPLETO, SOMA DAS MÉDIAS, PESOS, MÉDIA 2 CASAS DECIMAIS, MED 3 CASAS, DATA DE NASCIMENTO
+        # Ajuste os nomes das colunas conforme a sua planilha real, se houver alguma diferença sutil
         df.columns = ['CLASSIF', 'NOME COMPLETO', 'SOMA DAS MÉDIAS', 'PESOS',
                       'MÉDIA 2 CASAS DECIMAIS', 'MED 3 CASAS', 'DATA DE NASCIMENTO']
 
@@ -62,7 +63,8 @@ def app():
     st.title("Sistema de Lotação de Militares - CFSD BM 2025")
     st.subheader("Escolha de Lotação por Classificação")
 
-    # Carregar dados - AGORA APONTA PARA "NOTAS.xlsx"
+    # Carregar dados - APONTA PARA "NOTAS.xlsx"
+    # Se você está usando o arquivo original "NOTAS_CFSD_BM_GERAL.xlsx", mude para esse nome.
     df = load_data("NOTAS.xlsx")
 
     if df.empty:
@@ -116,7 +118,7 @@ def app():
                 st.session_state.choices[militar_nome] = selected_city
                 st.success(f"{militar_nome} lotado(a) em {selected_city}.")
                 st.session_state.current_militar_index += 1
-                st.experimental_rerun() # Recarrega para atualizar a interface
+                st.rerun() # Usando st.rerun() conforme a correção
             else:
                 st.warning("Por favor, selecione uma cidade.")
     else:
@@ -137,7 +139,7 @@ def app():
         st.session_state.vacancies = initial_vacancies.copy()
         st.session_state.choices = {}
         st.session_state.current_militar_index = 0
-        st.experimental_rerun()
+        st.rerun() # Usando st.rerun() conforme a correção
 
 if __name__ == "__main__":
     app()
