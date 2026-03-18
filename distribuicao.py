@@ -21,7 +21,6 @@ def load_data(file_path):
         # Renomear colunas para facilitar o acesso e lidar com nomes duplicados/vazios
         # Baseado na estrutura da sua planilha, as colunas são:
         # CLASSIF, NOME COMPLETO, SOMA DAS MÉDIAS, PESOS, MÉDIA 2 CASAS DECIMAIS, MED 3 CASAS, DATA DE NASCIMENTO
-        # Note que a coluna 'CRITÉRIOS DE DESEMPATE' na planilha original é dividida em 'MED 3 CASAS' e 'DATA DE NASCIMENTO'
         # O Pandas, ao ler com skiprows, pode ter nomeado as colunas de forma ligeiramente diferente
         # Vamos garantir que os nomes estejam corretos para o acesso posterior
         df.columns = ['CLASSIF', 'NOME COMPLETO', 'SOMA DAS MÉDIAS', 'PESOS',
@@ -43,7 +42,7 @@ def load_data(file_path):
         return df
     except Exception as e:
         st.error(f"Erro ao carregar a planilha: {e}")
-        st.error("Verifique se o nome do arquivo está correto ('NOTAS_CFSD_BM_GERAL.xlsx' ou 'NOTAS.xlsx') e se o formato do cabeçalho da planilha está conforme o esperado.")
+        st.error("Verifique se o nome do arquivo está correto ('NOTAS_CFSD_BM_GERAL.xlsx') e se o formato do cabeçalho da planilha está conforme o esperado.")
         return pd.DataFrame()
 
 # Cidades de lotação no Amazonas e vagas iniciais
@@ -67,8 +66,7 @@ def app():
     st.subheader("Escolha de Lotação por Classificação")
 
     # Carregar dados - APONTA PARA "NOTAS_CFSD_BM_GERAL.xlsx"
-    # Se você renomeou o arquivo para "NOTAS.xlsx", mude para esse nome.
-    df = load_data("NOTA.xlsx")
+    df = load_data("NOTAS_CFSD_BM_GERAL.xlsx")
 
     if df.empty:
         st.warning("Não foi possível carregar os dados da planilha. Verifique o arquivo e o console para mais detalhes.")
