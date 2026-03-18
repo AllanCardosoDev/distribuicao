@@ -68,7 +68,7 @@ def app():
 
     # Carregar dados - APONTA PARA "NOTAS_CFSD_BM_GERAL.xlsx"
     # Se você renomeou o arquivo para "NOTAS.xlsx", mude para esse nome.
-    df = load_data("NOTAS_CFSD_BM_GERAL.xlsx")
+    df = load_data("NOTA.xlsx")
 
     if df.empty:
         st.warning("Não foi possível carregar os dados da planilha. Verifique o arquivo e o console para mais detalhes.")
