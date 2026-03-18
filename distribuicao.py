@@ -1,17 +1,26 @@
 import streamlit as st
 import pandas as pd
+import os # Importa o módulo os para lidar com caminhos de arquivo
 
 # Função para carregar os dados da planilha
 @st.cache_data
 def load_data(file_path):
     try:
+        # --- Adição para depuração ---
+        # Verifica se o arquivo existe no caminho especificado
+        if not os.path.exists(file_path):
+            st.error(f"Erro: O arquivo '{file_path}' não foi encontrado no diretório atual ou no caminho especificado.")
+            st.error(f"Caminho absoluto que o aplicativo está procurando: {os.path.abspath(file_path)}")
+            st.error(f"Diretório de trabalho atual do aplicativo: {os.getcwd()}")
+            return pd.DataFrame()
+        # --- Fim da adição para depuração ---
+
         # Carrega a planilha inteira para inspecionar o cabeçalho
         # header=None para não tentar adivinhar o cabeçalho inicialmente
         df_raw = pd.read_excel(file_path, sheet_name=0, header=None)
 
         # Encontra a linha que contém 'CLASSIF' para usar como cabeçalho
         # Converte a primeira coluna para string para evitar erros com tipos mistos
-        # A planilha que você enviou tem 'CLASSIF' na linha 3 (índice 2)
         header_row_index = df_raw[df_raw.iloc[:, 0].astype(str).str.contains('CLASSIF', na=False)].index[0]
 
         # Agora, carrega a planilha novamente, usando a linha encontrada como cabeçalho
@@ -19,10 +28,6 @@ def load_data(file_path):
         df = pd.read_excel(file_path, sheet_name=0, skiprows=header_row_index)
 
         # Renomear colunas para facilitar o acesso e lidar com nomes duplicados/vazios
-        # Baseado na estrutura da sua planilha, as colunas são:
-        # CLASSIF, NOME COMPLETO, SOMA DAS MÉDIAS, PESOS, MÉDIA 2 CASAS DECIMAIS, MED 3 CASAS, DATA DE NASCIMENTO
-        # O Pandas, ao ler com skiprows, pode ter nomeado as colunas de forma ligeiramente diferente
-        # Vamos garantir que os nomes estejam corretos para o acesso posterior
         df.columns = ['CLASSIF', 'NOME COMPLETO', 'SOMA DAS MÉDIAS', 'PESOS',
                       'MÉDIA 2 CASAS DECIMAIS', 'MED 3 CASAS', 'DATA DE NASCIMENTO']
 
@@ -30,13 +35,9 @@ def load_data(file_path):
         df = df.dropna(subset=['NOME COMPLETO'])
 
         # Limpar a coluna 'CLASSIF' para ter apenas o número inteiro
-        # Primeiro, converte para string para poder usar .split('º')
         df['CLASSIF'] = df['CLASSIF'].astype(str).apply(lambda x: int(x.split('º')[0]) if 'º' in x else x)
-        # Converte para numérico, transformando erros em NaN
         df['CLASSIF'] = pd.to_numeric(df['CLASSIF'], errors='coerce')
-        # Remove linhas onde a classificação não é um número válido
         df = df.dropna(subset=['CLASSIF'])
-        # Converte para inteiro
         df['CLASSIF'] = df['CLASSIF'].astype(int)
 
         return df
@@ -46,8 +47,6 @@ def load_data(file_path):
         return pd.DataFrame()
 
 # Cidades de lotação no Amazonas e vagas iniciais
-# Estas são sugestões baseadas em municípios com presença do CBMAM ou importância estratégica.
-# Você pode ajustar os números conforme a necessidade real.
 initial_vacancies = {
     "Manaus": 100,
     "Parintins": 10,
@@ -66,7 +65,7 @@ def app():
     st.subheader("Escolha de Lotação por Classificação")
 
     # Carregar dados - APONTA PARA "NOTAS_CFSD_BM_GERAL.xlsx"
-    df = load_data("NOTAS_CFSD_BM_GERAL.xlsx")
+    df = load_data("NOTAS.xlsx")
 
     if df.empty:
         st.warning("Não foi possível carregar os dados da planilha. Verifique o arquivo e o console para mais detalhes.")
